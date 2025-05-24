@@ -14,13 +14,14 @@ function makeQueryClient() {
         // With SSR, we usually want to set some default staleTime
         // above 0 to avoid refetching immediately on the client
         staleTime: 6 * 1000, // 6 sec
+        gcTime: 10 * 1000, // 10 sec
       },
     },
   });
 }
 
 let browserQueryClient: QueryClient | undefined = undefined;
-function getQueryClient() {
+export function getQueryClient() {
   if (isServer) {
     // Server: always make a new query client
     return makeQueryClient();

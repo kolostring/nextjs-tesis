@@ -1,15 +1,18 @@
 import { createDIToken } from "@/ioc/common/utils";
-import { Patient } from "../../domain/entities/Patient";
+import { Patient } from "../entities/Patient";
 import { Result } from "@/common/types/Result";
-import { Treatment } from "../../domain/entities/Treatment";
-import { DTOPatientUpdateRequest } from "../dtos/DTOPatientUpdateRequest";
-import { DTOPatientCreateRequest } from "../dtos/DTOPatientCreateRequest";
+import { Treatment } from "../entities/Treatment";
+import { StrictOmit } from "@/common/types/StrictOmit";
 
 export interface PatientRepository {
   getPatientById: (id: string) => Promise<Result<Patient>>;
-  getAllPatients: (ids?: string[]) => Promise<Result<Patient[]>>;
-  createPatient: (request: DTOPatientCreateRequest) => Promise<Result<Patient>>;
-  updatePatient: (request: DTOPatientUpdateRequest) => Promise<Result<Patient>>;
+  getPatientsList: (ids?: string[]) => Promise<Result<Patient[]>>;
+  createPatient: (
+    request: StrictOmit<Patient, "id" | "treatments">,
+  ) => Promise<Result<Patient>>;
+  updatePatient: (
+    request: StrictOmit<Patient, "treatments">,
+  ) => Promise<Result<Patient>>;
   deletePatient: (id: string) => Promise<Result<void>>;
   addTreatment: (
     patientId: string,

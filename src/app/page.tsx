@@ -1,3 +1,9 @@
+import Test from "@/components/Test";
+
 export default function Page() {
-  return <div>Hello World</div>;
+  return (
+    <div>
+      <Test />
+    </div>
+  );
 }

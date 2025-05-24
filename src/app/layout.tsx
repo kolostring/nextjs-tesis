@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
-import QueryProvider from "@/presentation/queries/QueryProvider";
+import QueryProvider from "@/presentation/context/QueryProvider";
+import DIConfig from "@/ioc/DIConfig";
 
 const serif = Playfair_Display({
   variable: "--font-serif",
@@ -39,7 +40,9 @@ export default function RootLayout({
       <body
         className={`${sans.variable} ${serif.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <DIConfig>{children}</DIConfig>
+        </QueryProvider>
       </body>
     </html>
   );
