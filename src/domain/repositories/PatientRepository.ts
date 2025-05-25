@@ -1,27 +1,33 @@
 import { createDIToken } from "@/ioc/common/utils";
 import { Patient } from "../entities/Patient";
 import { Result } from "@/common/types/Result";
-import { Treatment } from "../entities/Treatment";
-import { StrictOmit } from "@/common/types/StrictOmit";
+import { PatientUser } from "../entities/PatientUser";
+
+export interface CreatePatientRequest {
+  fullName: string;
+  dateOfBirth?: Date;
+  description?: string;
+}
+
+export interface UpdatePatientRequest {
+  id: string;
+  fullName?: string;
+  dateOfBirth?: Date;
+  description?: string;
+}
 
 export interface PatientRepository {
   getPatientById: (id: string) => Promise<Result<Patient>>;
   getPatientsList: (ids?: string[]) => Promise<Result<Patient[]>>;
-  createPatient: (
-    request: StrictOmit<Patient, "id" | "treatments">,
-  ) => Promise<Result<Patient>>;
-  updatePatient: (
-    request: StrictOmit<Patient, "treatments">,
-  ) => Promise<Result<Patient>>;
+  getPatientsByUser: (userId: string) => Promise<Result<Patient[]>>;
+  createPatient: (request: CreatePatientRequest, userId: string) => Promise<Result<Patient>>;
+  updatePatient: (request: UpdatePatientRequest) => Promise<Result<Patient>>;
   deletePatient: (id: string) => Promise<Result<void>>;
-  addTreatment: (
-    patientId: string,
-    treatment: Treatment,
-  ) => Promise<Result<void>>;
-  updateTreatment: (
-    patientId: string,
-    treatment: Treatment,
-  ) => Promise<Result<void>>;
+  
+  // Patient-User association methods
+  associatePatientWithUser: (patientId: string, userId: string) => Promise<Result<PatientUser>>;
+  removePatientUserAssociation: (patientId: string, userId: string) => Promise<Result<void>>;
+  getUserPatientsAssociations: (userId: string) => Promise<Result<PatientUser[]>>;
 }
 
 export const PatientRepository =

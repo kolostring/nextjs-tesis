@@ -8,5 +8,16 @@ export const infrastructureQueryKeys = createQueryKeyStore({
     byId: (id: string) => ({
       queryKey: [id],
     }),
+    byUser: (userId: string) => ({
+      queryKey: [userId],
+    }),
+  },
+  treatments: {
+    byPatient: (patientId: string) => ({
+      queryKey: [patientId],
+    }),
+    byId: (id: string) => ({
+      queryKey: [id],
+    }),
   },
 });

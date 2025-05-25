@@ -1,44 +1,22 @@
 "use client";
-import { isServer, QueryClient } from "@tanstack/react-query";
 import DependenciesProvider from "./context/DependenciesProvider";
 import { buildContainer, buildManager } from "./common/utils";
 import { PatientRepository } from "@/domain/repositories/PatientRepository";
-import { MockPatientRepository } from "@/infrastructure/mock/MockPatientRepository";
-
-function makeQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        // With SSR, we usually want to set some default staleTime
-        // above 0 to avoid refetching immediately on the client
-        staleTime: 6 * 1000, // 6 sec
-      },
-    },
-  });
-}
-
-let browserQueryClient: QueryClient | undefined = undefined;
-function getQueryClient() {
-  if (isServer) {
-    // Server: always make a new query client
-    return makeQueryClient();
-  } else {
-    // Browser: make a new query client if we don't already have one
-    // This is very important, so we don't re-make a new client if React
-    // suspends during the initial render. This may not be needed if we
-    // have a suspense boundary BELOW the creation of the query client
-    browserQueryClient ??= makeQueryClient();
-    return browserQueryClient;
-  }
-}
+import { TreatmentRepository } from "@/domain/repositories/TreatmentRepository";
+import { TreatmentBlockRepository } from "@/domain/repositories/TreatmentBlockRepository";
+import { TherapeuticActivityRepository } from "@/domain/repositories/TherapeuticActivityRepository";
+import { ClientSupabasePatientRepository } from "@/infrastructure/supabase/ClientSupabasePatientRepository";
+import { ClientSupabaseTreatmentRepository } from "@/infrastructure/supabase/ClientSupabaseTreatmentRepository";
+import { ClientSupabaseTreatmentBlockRepository } from "@/infrastructure/supabase/ClientSupabaseTreatmentBlockRepository";
+import { ClientSupabaseTherapeuticActivityRepository } from "@/infrastructure/supabase/ClientSupabaseTherapeuticActivityRepository";
 
 export default function DIConfig({ children }: { children: React.ReactNode }) {
-  const queryClient = getQueryClient();
   const manager = buildManager().registerContainer(
-    buildContainer().register(
-      PatientRepository,
-      MockPatientRepository(queryClient),
-    ),
+    buildContainer()
+      .register(PatientRepository, new ClientSupabasePatientRepository())
+      .register(TreatmentRepository, new ClientSupabaseTreatmentRepository())
+      .register(TreatmentBlockRepository, new ClientSupabaseTreatmentBlockRepository())
+      .register(TherapeuticActivityRepository, new ClientSupabaseTherapeuticActivityRepository()),
   );
 
   return (
