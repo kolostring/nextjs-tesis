@@ -23,10 +23,19 @@ export function buildContainer(
 
       return buildContainer(newState);
     },
-    resolve<T>(token: DIToken<T>): T {
-      if (!(token in containerState))
-        throw new Error(`Token Symbol(${token.description}) not found`);
-      return containerState[token] as T;
+    resolve(...args: [any, ...any[]]): any {
+      if (args.length === 1) {
+        const token = args[0];
+        if (!(token in containerState))
+          throw new Error(`Token Symbol(${token.description}) not found`);
+        return containerState[token];
+      }
+
+      return args.map((token) => {
+        if (!(token in containerState))
+          throw new Error(`Token Symbol(${token.description}) not found`);
+        return containerState[token];
+      });
     },
     resolveAll(): DIContainerState {
       return containerState;

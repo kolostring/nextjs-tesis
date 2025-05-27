@@ -3,6 +3,7 @@ import { Geist_Mono, Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/presentation/context/QueryProvider";
 import DIConfig from "@/ioc/DIConfig";
+import { Toaster } from "sonner";
 
 const serif = Playfair_Display({
   variable: "--font-serif",
@@ -30,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         {process.env.NODE_ENV === "development" && (
           <script
@@ -41,11 +42,12 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${sans.variable} ${serif.variable} ${geistMono.variable} antialiased`}
+        className={`${sans.variable} ${serif.variable} ${geistMono.variable} bg-background antialiased`}
       >
         <QueryProvider>
           <DIConfig>{children}</DIConfig>
         </QueryProvider>
+        <Toaster />
       </body>
     </html>
   );

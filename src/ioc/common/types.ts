@@ -9,6 +9,9 @@ export type DIManagerState = {
 export interface DIContainer {
   register<T>(token: DIToken<T>, value: T): DIContainer;
   resolve<T>(token: DIToken<T>): T;
+  resolve<T extends readonly DIToken<any>[]>(
+    ...tokens: T
+  ): { [K in keyof T]: T[K] extends DIToken<infer R> ? R : never };
   resolveAll(): DIContainerState;
 }
 
