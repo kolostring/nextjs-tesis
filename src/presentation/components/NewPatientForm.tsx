@@ -24,8 +24,9 @@ import { Textarea } from "./ui/textarea";
 import { useRouter } from "next/navigation";
 import { useDependencies } from "@/ioc/context/DependenciesProvider";
 import { PatientRepository } from "@/domain/repositories/PatientRepository";
-import { isAfter, isBefore, isValid, parse } from "date-fns";
+import { isAfter, isValid, parse } from "date-fns";
 import { toast } from "sonner";
+import Spinner from "./ui/spinner";
 
 const newPatientSchema = z.object({
   fullName: z
@@ -78,7 +79,7 @@ export default function NewPatientForm() {
 
     if (res.ok) {
       router.push("/");
-      toast("Paciente creado exitosamente!, redirigiendo...");
+      toast("Paciente creado exitosamente!");
     } else {
       console.log(res);
       toast.error("Error al crear el paciente: ", {
@@ -146,7 +147,9 @@ export default function NewPatientForm() {
             />
           </CardContent>
           <CardFooter className="justify-end">
-            <Button type="submit">Crear Paciente</Button>
+            <Button type="submit">
+              {form.formState.isSubmitting ? <Spinner /> : "Crear Paciente"}
+            </Button>
           </CardFooter>
         </Card>
       </form>

@@ -1,4 +1,6 @@
-export const presentationQueryKeys = {
+import { createQueryKeyStore } from "@lukemorales/query-key-factory";
+
+export const presentationQueryKeys = createQueryKeyStore({
   patients: {
     all: (ids?: string[]) => ({
       queryKey: [ids],
@@ -7,4 +9,4 @@ export const presentationQueryKeys = {
       queryKey: [id],
     }),
   },
-};
+});

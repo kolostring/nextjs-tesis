@@ -11,9 +11,23 @@ import {
 import Link from "next/link";
 import { EditIcon, Share2Icon, TrashIcon } from "lucide-react";
 import { differenceInYears } from "date-fns";
+import useMutationDeletePatient from "../mutations/useMutationDeletePatient";
+import { toast } from "sonner";
+import Spinner from "./ui/spinner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
 export default function PatientsList() {
   const getAllPatients = useQueryGetAllPatients();
+
+  const deletePatient = useMutationDeletePatient();
 
   if (getAllPatients.isLoading) return <div>Cargando Pacientes...</div>;
   if (getAllPatients.isError)
@@ -37,7 +51,15 @@ export default function PatientsList() {
       </div>
       <div>
         {getAllPatients.data.value.length === 0 ? (
-          <p>No hay pacientes registrados.</p>
+          <div className="grid place-items-center gap-4 text-center">
+            <p className="max-w-[40ch]">
+              No hay pacientes registrados. <br />
+              ¡Añade uno para comenzar a gestionar su tratamiento!.
+            </p>
+            <Button asChild>
+              <Link href="/patients/new">Añadir Paciente</Link>
+            </Button>
+          </div>
         ) : (
           <Accordion type="single">
             {getAllPatients.data.value.map((patient) => (
@@ -55,7 +77,7 @@ export default function PatientsList() {
                     </span>
                   </h3>
                 </AccordionTrigger>
-                <AccordionContent className="pb-8">
+                <AccordionContent className="grid px-8 pb-8">
                   {patient.treatments.length === 0 ? (
                     <div className="grid place-items-center gap-4 text-center">
                       <p className="max-w-[40ch] text-pretty">
@@ -69,7 +91,39 @@ export default function PatientsList() {
                       </Button>
                     </div>
                   ) : (
-                    <p>Tratamientos: {patient.treatments.length}</p>
+                    <>
+                      <p>Tratamientos: {patient.treatments.length}</p>
+                      <Accordion type="multiple">
+                        {patient.treatments.map((val) => (
+                          <AccordionItem value={val.id} key={val.id}>
+                            <AccordionTrigger>{val.name}</AccordionTrigger>
+                            <AccordionContent className="px-8 pb-8">
+                              <ol className="list-decimal">
+                                {val.treatmentBlocks
+                                  .map((block) =>
+                                    block.therapeuticActivities.map(
+                                      (activity) => (
+                                        <li key={activity.name + val.id}>
+                                          {activity.name}
+                                        </li>
+                                      ),
+                                    ),
+                                  )
+                                  .reduce((acc, val) => acc.concat(val), [])}
+                              </ol>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                      <Button
+                        className="w-fit items-center justify-self-end"
+                        asChild
+                      >
+                        <Link href={`/patients/${patient.id}/treatments/new`}>
+                          <span>Registrar Tratamiento</span>
+                        </Link>
+                      </Button>
+                    </>
                   )}
                   <div className="flex justify-end pt-4">
                     <Button variant="ghost">
@@ -78,9 +132,43 @@ export default function PatientsList() {
                     <Button variant="ghost">
                       <Share2Icon />
                     </Button>
-                    <Button variant="ghost">
-                      <TrashIcon />
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost">
+                          <TrashIcon />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Eliminar Paciente</DialogTitle>
+                          <DialogDescription>
+                            ¿Estás seguro que quieres eliminar este paciente?.
+                            Esta acción no se puede deshacer.
+                          </DialogDescription>
+                        </DialogHeader>
+
+                        <DialogFooter>
+                          <Button
+                            variant="destructive"
+                            onClick={async () => {
+                              const res = await deletePatient.mutateAsync(
+                                patient.id,
+                              );
+                              if (!res.ok) {
+                                toast.error(
+                                  "Error eliminando paciente: " +
+                                    res.errors
+                                      .map((err) => err.message)
+                                      .join(", "),
+                                );
+                              }
+                            }}
+                          >
+                            {deletePatient.isPending ? <Spinner /> : "Eliminar"}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </AccordionContent>
               </AccordionItem>

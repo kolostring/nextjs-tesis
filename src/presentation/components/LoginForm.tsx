@@ -23,6 +23,7 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
+import Spinner from "./ui/spinner";
 
 const loginSchema = z.object({
   email: z
@@ -73,9 +74,9 @@ export default function LoginForm() {
       >
         <Card className="w-xl max-w-full gap-8">
           <CardHeader>
-            <CardTitle>Accede a tu cuenta</CardTitle>
+            <CardTitle className="text-4xl">Accede a tu cuenta</CardTitle>
             <CardDescription>
-              Introduce tu correo electrónico y contraseña
+              Obtén acceso a tu cuenta para gestionar tus pacientes
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -107,7 +108,9 @@ export default function LoginForm() {
             />
           </CardContent>
           <CardFooter className="justify-end">
-            <Button type="submit">Iniciar Sesión</Button>
+            <Button type="submit">
+              {form.formState.isSubmitting ? <Spinner /> : "Iniciar Sesión"}
+            </Button>
           </CardFooter>
         </Card>
       </form>

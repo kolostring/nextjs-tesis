@@ -11,82 +11,49 @@ export default function SupabasePatientRepository(
 ): PatientRepository {
   return {
     async getPatientById(id) {
-      try {
-        const { data, error } = await supabaseClient
-          .from("patients")
-          .select("*, patients_users!inner(user_id)")
-          .eq("id", Number.parseInt(id))
-          .single();
-
-        if (error) {
-          return Result.error([
-            {
-              code: "SUPABASE_ERROR",
-              message: error.message,
-            },
-          ]);
-        }
-
-        const patient: Patient = {
-          id: data.id.toString(),
-          fullName: data.full_name,
-          dateOfBirth: data.date_of_birth
-            ? new Date(data.date_of_birth)
-            : undefined,
-          description: data.description ?? undefined,
-          treatments: [],
-        };
-
-        return Result.ok(patient);
-      } catch (error) {
-        return Result.error([
-          {
-            code: "UNEXPECTED_ERROR",
-            message: error instanceof Error ? error.message : "Unknown error",
-          },
-        ]);
+      const res = await this.getPatientsList([id]);
+      if (res.ok) {
+        return Result.ok(res.value[0]);
       }
+      return res;
     },
     async getPatientsList(ids) {
       try {
-        const userId = (await supabaseClient.auth.getUser()).data.user?.id;
-        if (!userId)
-          return Result.error([
-            { code: "UNAUTHORIZED", message: "Not logged in" },
-          ]);
-
-        let query = supabaseClient
-          .from("patients")
-          .select("*, patients_users!inner(user_id)");
-
-        if (ids && ids.length > 0) {
-          query = query.in("id", ids.map(Number.parseInt));
-        }
-
-        const { data, error } = await query.order("created_at", {
-          ascending: false,
+        const { data, error } = await supabaseClient.rpc("get_patients_list", {
+          p_ids: ids?.map(Number.parseInt),
         });
 
-        if (error) {
-          return Result.error([
-            {
-              code: "SUPABASE_ERROR",
-              message: error.message,
-            },
-          ]);
-        }
-
-        const patients = data.map(
-          (row): Patient => ({
-            id: row.id.toString(),
-            fullName: row.full_name,
-            dateOfBirth: row.date_of_birth
-              ? new Date(row.date_of_birth)
-              : undefined,
-            description: row.description ?? undefined,
-            treatments: [],
-          }),
-        );
+        const patients =
+          data?.map(
+            (row): Patient => ({
+              id: row.id?.toString() ?? "",
+              fullName: row.full_name ?? "",
+              dateOfBirth: row.date_of_birth
+                ? new Date(row.date_of_birth)
+                : undefined,
+              description: row.description ?? undefined,
+              treatments:
+                row.treatments?.map((val) => ({
+                  id: val.id?.toString() ?? "",
+                  eyeCondition: val.eye_condition ?? "",
+                  name: val.name ?? "",
+                  description: val.description ?? "",
+                  treatmentBlocks:
+                    val.treatment_blocks?.map((val) => ({
+                      beginningDate: new Date(val.beginning_date ?? ""),
+                      durationDays: val.duration_days ?? 0,
+                      iterations: val.iterations ?? 0,
+                      therapeuticActivities:
+                        val.therapeutic_activities?.map((val) => ({
+                          name: val.name ?? "",
+                          dayOfBlock: val.day_of_block ?? 0,
+                          beginningHour: val.beginning_hour ?? "",
+                          endHour: val.end_hour ?? "",
+                        })) ?? [],
+                    })) ?? [],
+                })) ?? [],
+            }),
+          ) ?? [];
 
         return Result.ok(patients);
       } catch (error) {
@@ -241,11 +208,22 @@ export default function SupabasePatientRepository(
 
     async addTreatment(patientId, treatment) {
       try {
-        const { error } = await supabaseClient.from("treatments").insert({
-          patient_id: parseInt(patientId),
-          eye_condition: treatment.eyeCondition,
-          name: treatment.name,
-          description: treatment.description,
+        const { error } = await supabaseClient.rpc("insert_full_treatment", {
+          p_patient_id: Number.parseInt(patientId),
+          p_eye_condition: treatment.eyeCondition,
+          p_name: treatment.name,
+          p_description: treatment.description ?? "",
+          p_blocks: treatment.treatmentBlocks.map((val) => ({
+            beginning_date: val.beginningDate.toISOString(),
+            duration_days: val.durationDays,
+            iterations: val.iterations,
+            activities: val.therapeuticActivities.map((val) => ({
+              name: val.name,
+              day_of_block: val.dayOfBlock,
+              beginning_hour: val.beginningHour,
+              end_hour: val.endHour,
+            })),
+          })),
         });
 
         if (error) {

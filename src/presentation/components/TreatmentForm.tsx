@@ -29,6 +29,19 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 import { PlusIcon, TrashIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogContent,
+} from "./ui/dialog";
+import Link from "next/link";
+import Spinner from "./ui/spinner";
 
 const therapeuticActivitySchema = z.object({
   name: z.string().min(1, "Debe ingresar un nombre"),
@@ -39,7 +52,7 @@ const therapeuticActivitySchema = z.object({
 
 const treatmentBlockSchema = z
   .object({
-    beginningDate: z.string().min(1, "Debe ingresar una fecha"),
+    beginningDate: z.date(),
     durationDays: z.number().min(1, "La duración mínima es de 1 día"),
     iterations: z.number().min(1, "La cantidad mínima de iteraciones es de 1"),
     therapeuticActivities: z.array(therapeuticActivitySchema),
@@ -65,6 +78,10 @@ const treatmentSchema = z.object({
 });
 
 export function NewTreatmentForm({ patientId }: { patientId: string }) {
+  const { getContainer } = useDependencies();
+  const patientRepository = getContainer().resolve(PatientRepository);
+  const router = useRouter();
+
   const emptyTreatment: Treatment = {
     id: "",
     eyeCondition: "",
@@ -77,7 +94,19 @@ export function NewTreatmentForm({ patientId }: { patientId: string }) {
     <PopulatedTreatmentForm
       treatment={emptyTreatment}
       onSubmit={async (data) => {
-        console.log(data);
+        const res = await patientRepository.addTreatment(
+          patientId,
+          data as Treatment,
+        );
+        if (res.ok) {
+          router.push(`/`);
+        } else {
+          console.log(res);
+          toast.error(
+            "Error al añadir tratamiento: " +
+              res.errors.map((e) => e.message).join(", "),
+          );
+        }
       }}
     />
   );
@@ -187,9 +216,25 @@ function PopulatedTreatmentForm({
         />
 
         <fieldset className="mt-2 mb-4 grid">
-          <legend className="float-left mb-2 text-xl font-bold uppercase">
-            Bloques de tratamiento
-          </legend>
+          <div className="mb-8 flex items-center justify-between">
+            <legend className="float-left mb-2 text-2xl font-bold uppercase">
+              Bloques de tratamiento
+            </legend>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                treatmentBlocksArrayField.append({
+                  beginningDate: new Date(),
+                  durationDays: 1,
+                  iterations: 1,
+                  therapeuticActivities: [],
+                })
+              }
+            >
+              Añadir Bloque
+            </Button>
+          </div>
 
           <Accordion
             type="multiple"
@@ -207,13 +252,17 @@ function PopulatedTreatmentForm({
               );
 
               return (
-                <AccordionItem value={index + ""} key={field.id}>
-                  <AccordionTrigger>
+                <AccordionItem
+                  value={index + ""}
+                  key={field.id}
+                  className="bg-card mb-8 rounded-xl px-4"
+                >
+                  <AccordionTrigger className="text-xl uppercase">
                     {blockName.length > 0
                       ? blockName
                       : `Bloque de tratamiento ${index + 1}`}
                   </AccordionTrigger>
-                  <AccordionContent className="mb-4 grid gap-4 md:px-12">
+                  <AccordionContent className="grid gap-4 py-8 md:px-8">
                     <FormField
                       control={form.control}
                       name={`treatmentBlocks.${index}.beginningDate`}
@@ -221,7 +270,15 @@ function PopulatedTreatmentForm({
                         <FormItem className="flex items-center gap-4">
                           <FormLabel>Fecha de inicio *</FormLabel>
                           <FormControl>
-                            <Input className="w-fit" type="date" {...field} />
+                            <Input
+                              className="w-fit"
+                              type="date"
+                              {...field}
+                              value={field.value?.toISOString().split("T")[0]}
+                              onChange={(e) => {
+                                field.onChange(new Date(e.target.value));
+                              }}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -270,29 +327,55 @@ function PopulatedTreatmentForm({
                     <TherapeuticActivitiesFieldset
                       treatmentBlockIndex={index}
                     />
+
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          className="mt-4 ml-auto"
+                        >
+                          Eliminar Bloque de tratamiento
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>
+                            Eliminar bloque de tratamiento
+                          </DialogTitle>
+                          <DialogDescription>
+                            ¿Estás seguro que quieres eliminar este bloque de
+                            tratamiento?
+                          </DialogDescription>
+                        </DialogHeader>
+
+                        <DialogFooter>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={() => {
+                              treatmentBlocksArrayField.remove(index);
+                            }}
+                          >
+                            Eliminar
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </AccordionContent>
                 </AccordionItem>
               );
             })}
           </Accordion>
-          <div className="flex justify-end">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() =>
-                treatmentBlocksArrayField.append({
-                  beginningDate: new Date().toISOString().split("T")[0],
-                  durationDays: 1,
-                  iterations: 1,
-                  therapeuticActivities: [],
-                })
-              }
-            >
-              Añadir Bloque de tratamiento
-            </Button>
-          </div>
         </fieldset>
-        <Button>Submit</Button>
+        <div className="flex justify-end gap-4">
+          <Button asChild variant="ghost">
+            <Link href="/">Cancelar</Link>
+          </Button>
+          <Button>
+            {form.formState.isSubmitting ? <Spinner /> : "Guardar"}
+          </Button>
+        </div>
       </form>
     </FormProvider>
   );
@@ -311,7 +394,7 @@ function TherapeuticActivitiesFieldset({
   });
 
   return (
-    <fieldset className="mt-4 grid">
+    <fieldset className="mt-8 grid">
       <div className="mb-4 flex items-center justify-between">
         <legend className="float-left tracking-wider uppercase">
           Actividades terapéuticas
@@ -333,25 +416,46 @@ function TherapeuticActivitiesFieldset({
         </Button>
       </div>
 
-      <div className="grid gap-2">
-        <div className="border-muted grid grid-cols-[3fr_1fr_2fr_2fr_20px] gap-1 border-t border-b py-4 text-xs md:px-4 md:*:pl-4">
+      <div className="grid gap-8 md:gap-2">
+        <div className="border-muted hidden grid-cols-[3fr_1fr_2fr_2fr_20px] gap-1 border-t border-b py-4 text-xs md:grid md:px-4 md:*:pl-4">
           <span>Nombre</span>
           <span>Día</span>
-          <span>Hora de inicio</span>
-          <span>Hora de fin</span>
+          <span>Hora inicio</span>
+          <span>Hora fin</span>
         </div>
+
+        {therapeuticActivitiesArrayField.fields.length === 0 && (
+          <div className="grid place-items-center gap-4 text-center">
+            <p className="max-w-[40ch] text-pretty">
+              No hay actividades registradas.
+            </p>
+            <Button
+              type="button"
+              onClick={() =>
+                therapeuticActivitiesArrayField.append({
+                  name: "",
+                  dayOfBlock: 1,
+                  beginningHour: "09:00",
+                  endHour: "10:00",
+                })
+              }
+            >
+              Añadir Actividad
+            </Button>
+          </div>
+        )}
 
         {therapeuticActivitiesArrayField.fields.map((field, index) => (
           <div
             key={field.id}
-            className="grid grid-cols-[3fr_1fr_2fr_2fr_20px] gap-1 md:px-4 [&_input]:!text-xs"
+            className="grid grid-cols-6 gap-2 md:grid-cols-[3fr_1fr_2fr_2fr_20px] md:gap-1 md:px-4 [&_input]:!text-xs"
           >
             <FormField
               control={form.control}
               name={`treatmentBlocks.${treatmentBlockIndex}.therapeuticActivities.${index}.name`}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="sr-only">
+                <FormItem className="col-span-5 md:col-span-1">
+                  <FormLabel className="md:sr-only">
                     Nombre de la Actividad *
                   </FormLabel>
                   <FormControl>
@@ -365,8 +469,8 @@ function TherapeuticActivitiesFieldset({
               control={form.control}
               name={`treatmentBlocks.${treatmentBlockIndex}.therapeuticActivities.${index}.dayOfBlock`}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="sr-only">Día del bloque *</FormLabel>
+                <FormItem className="col-span-2 md:col-span-1">
+                  <FormLabel className="md:sr-only">Día bloque *</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -384,10 +488,14 @@ function TherapeuticActivitiesFieldset({
               control={form.control}
               name={`treatmentBlocks.${treatmentBlockIndex}.therapeuticActivities.${index}.beginningHour`}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="sr-only">Hora inicio *</FormLabel>
+                <FormItem className="col-span-2 md:col-span-1">
+                  <FormLabel className="md:sr-only">Hora inicio *</FormLabel>
                   <FormControl>
-                    <Input className="!text-xs" type="time" {...field} />
+                    <Input
+                      className="text-center !text-xs"
+                      type="time"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -397,10 +505,14 @@ function TherapeuticActivitiesFieldset({
               control={form.control}
               name={`treatmentBlocks.${treatmentBlockIndex}.therapeuticActivities.${index}.endHour`}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="sr-only">Hora fin *</FormLabel>
+                <FormItem className="col-span-2 md:col-span-1">
+                  <FormLabel className="md:sr-only">Hora fin *</FormLabel>
                   <FormControl>
-                    <Input className="!text-xs" type="time" {...field} />
+                    <Input
+                      className="text-center !text-xs"
+                      type="time"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -409,7 +521,7 @@ function TherapeuticActivitiesFieldset({
             <Button
               variant="ghost"
               type="button"
-              className="mt-1 h-fit min-w-0 p-[5px]"
+              className="col-start-6 row-start-1 mt-1 self-end p-[5px] md:col-start-auto md:row-start-auto md:mt-0 md:max-w-0 md:self-start"
               onClick={() => therapeuticActivitiesArrayField.remove(index)}
             >
               <TrashIcon />

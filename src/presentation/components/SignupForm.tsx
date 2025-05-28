@@ -23,6 +23,7 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
+import Spinner from "./ui/spinner";
 
 const signupSchema = z
   .object({
@@ -134,7 +135,9 @@ export default function SignupForm() {
             />
           </CardContent>
           <CardFooter className="justify-end">
-            <Button type="submit">Registarse</Button>
+            <Button type="submit">
+              {form.formState.isLoading ? <Spinner /> : "Registarse"}
+            </Button>
           </CardFooter>
         </Card>
       </form>
