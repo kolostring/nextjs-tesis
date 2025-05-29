@@ -23,18 +23,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import useMutationDeleteTreatment from "../mutations/useMutationDeleteTreatment";
 
 export default function PatientsList() {
   const getAllPatients = useQueryGetAllPatients();
 
-  const deletePatient = useMutationDeletePatient();
+  const deletePatientMutation = useMutationDeletePatient();
+  const deleteTreatmentMutation = useMutationDeleteTreatment();
 
   if (getAllPatients.isLoading) return <div>Cargando Pacientes...</div>;
-  if (getAllPatients.isError)
-    return <div>Ocurrió una excepción: {getAllPatients.error.message}</div>;
-  if (!getAllPatients.data) return <div>Datos vacíos</div>;
-  if (!getAllPatients.data.ok)
-    return <div>Error: {getAllPatients.data.errors[0].message}</div>;
+  if (getAllPatients.isError || !getAllPatients.data)
+    return (
+      <div>
+        Ocurrió una excepción: {getAllPatients.error?.message ?? "Datos vacíos"}
+      </div>
+    );
+
+  debugger;
 
   return (
     <>
@@ -50,7 +55,7 @@ export default function PatientsList() {
         </div>
       </div>
       <div>
-        {getAllPatients.data.value.length === 0 ? (
+        {getAllPatients.data.length === 0 ? (
           <div className="grid place-items-center gap-4 text-center">
             <p className="max-w-[40ch]">
               No hay pacientes registrados. <br />
@@ -62,7 +67,7 @@ export default function PatientsList() {
           </div>
         ) : (
           <Accordion type="single">
-            {getAllPatients.data.value.map((patient) => (
+            {getAllPatients.data.map((patient) => (
               <AccordionItem value={patient.id} key={patient.id}>
                 <AccordionTrigger>
                   <h3 className="[ flex items-end gap-2">
@@ -92,12 +97,20 @@ export default function PatientsList() {
                     </div>
                   ) : (
                     <>
-                      <p>Tratamientos: {patient.treatments.length}</p>
-                      <Accordion type="multiple">
+                      <p className="mb-4">
+                        Tratamientos: {patient.treatments.length}
+                      </p>
+                      <Accordion type="multiple" className="mb-4 gap-4">
                         {patient.treatments.map((val) => (
-                          <AccordionItem value={val.id} key={val.id}>
-                            <AccordionTrigger>{val.name}</AccordionTrigger>
-                            <AccordionContent className="px-8 pb-8">
+                          <AccordionItem
+                            value={val.id}
+                            key={val.id}
+                            className="bg-card rounded-lg"
+                          >
+                            <AccordionTrigger className="px-4">
+                              {val.name}
+                            </AccordionTrigger>
+                            <AccordionContent className="pr-4 pl-16">
                               <ol className="list-decimal">
                                 {val.treatmentBlocks
                                   .map((block) =>
@@ -111,6 +124,60 @@ export default function PatientsList() {
                                   )
                                   .reduce((acc, val) => acc.concat(val), [])}
                               </ol>
+
+                              <div className="mt-4 flex justify-end">
+                                <Button variant="ghost" asChild>
+                                  <Link
+                                    href={`/patients/${patient.id}/treatments/${val.id}/edit`}
+                                  >
+                                    <EditIcon />
+                                  </Link>
+                                </Button>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button variant="ghost">
+                                      <TrashIcon />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>
+                                        Eliminar tratamiento
+                                      </DialogTitle>
+                                      <DialogDescription>
+                                        ¿Estás seguro que quieres eliminar este
+                                        tratamiento?
+                                      </DialogDescription>
+                                    </DialogHeader>
+
+                                    <DialogFooter>
+                                      <Button
+                                        variant="destructive"
+                                        onClick={async () => {
+                                          const res =
+                                            await deleteTreatmentMutation.mutateAsync(
+                                              { id: val.id },
+                                            );
+                                          if (!res.ok) {
+                                            toast.error(
+                                              "Error eliminando tratamiento: " +
+                                                res.errors
+                                                  .map((err) => err.message)
+                                                  .join(", "),
+                                            );
+                                          }
+                                        }}
+                                      >
+                                        {deleteTreatmentMutation.isPending ? (
+                                          <Spinner />
+                                        ) : (
+                                          "Eliminar"
+                                        )}
+                                      </Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+                              </div>
                             </AccordionContent>
                           </AccordionItem>
                         ))}
@@ -126,8 +193,10 @@ export default function PatientsList() {
                     </>
                   )}
                   <div className="flex justify-end pt-4">
-                    <Button variant="ghost">
-                      <EditIcon />
+                    <Button variant="ghost" asChild>
+                      <Link href={`/patients/${patient.id}/edit`}>
+                        <EditIcon />
+                      </Link>
                     </Button>
                     <Button variant="ghost">
                       <Share2Icon />
@@ -151,9 +220,10 @@ export default function PatientsList() {
                           <Button
                             variant="destructive"
                             onClick={async () => {
-                              const res = await deletePatient.mutateAsync(
-                                patient.id,
-                              );
+                              const res =
+                                await deletePatientMutation.mutateAsync(
+                                  patient.id,
+                                );
                               if (!res.ok) {
                                 toast.error(
                                   "Error eliminando paciente: " +
@@ -164,7 +234,11 @@ export default function PatientsList() {
                               }
                             }}
                           >
-                            {deletePatient.isPending ? <Spinner /> : "Eliminar"}
+                            {deletePatientMutation.isPending ? (
+                              <Spinner />
+                            ) : (
+                              "Eliminar"
+                            )}
                           </Button>
                         </DialogFooter>
                       </DialogContent>

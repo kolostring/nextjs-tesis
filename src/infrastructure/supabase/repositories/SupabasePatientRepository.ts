@@ -245,17 +245,53 @@ export default function SupabasePatientRepository(
         ]);
       }
     },
-    async updateTreatment(patientId, treatment) {
+    async updateTreatment(treatment) {
+      try {
+        console.log(treatment);
+
+        const { error } = await supabaseClient.rpc("update_full_treatment", {
+          p_treatment_id: Number.parseInt(treatment.id),
+          p_eye_condition: treatment.eyeCondition,
+          p_name: treatment.name,
+          p_description: treatment.description ?? "",
+          p_blocks: treatment.treatmentBlocks?.map((val) => ({
+            beginning_date: val.beginningDate.toISOString(),
+            duration_days: val.durationDays,
+            iterations: val.iterations,
+            activities: val.therapeuticActivities.map((val) => ({
+              name: val.name,
+              day_of_block: val.dayOfBlock,
+              beginning_hour: val.beginningHour,
+              end_hour: val.endHour,
+            })),
+          })),
+        });
+
+        if (error) {
+          return Result.error([
+            {
+              code: "SUPABASE_ERROR",
+              message: error.message,
+            },
+          ]);
+        }
+
+        return Result.ok(undefined);
+      } catch (error) {
+        return Result.error([
+          {
+            code: "UNEXPECTED_ERROR",
+            message: error instanceof Error ? error.message : "Unknown error",
+          },
+        ]);
+      }
+    },
+    async deleteTreatment(treatmentId) {
       try {
         const { error } = await supabaseClient
           .from("treatments")
-          .update({
-            patient_id: Number.parseInt(patientId),
-            eye_condition: treatment.eyeCondition,
-            name: treatment.name,
-            description: treatment.description,
-          })
-          .eq("id", Number.parseInt(treatment.id));
+          .delete()
+          .eq("id", Number.parseInt(treatmentId));
 
         if (error) {
           return Result.error([

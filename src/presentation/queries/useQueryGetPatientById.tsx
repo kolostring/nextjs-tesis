@@ -8,8 +8,17 @@ export default function useQueryGetPatientById(id: string) {
   const patientRepository = getContainer().resolve(PatientRepository);
 
   return useQuery({
-    ...presentationQueryKeys.patients.all(),
-    queryFn: () => patientRepository.getPatientById(id),
-    throwOnError: true,
+    ...presentationQueryKeys.patients.byId(id),
+    queryFn: async () => {
+      const res = await patientRepository.getPatientById(id);
+
+      if (!res.ok) {
+        throw new Error(
+          `Error al obtener el paciente: ${res.errors.map((e) => e.message).join(", ")}`,
+        );
+      }
+
+      return res.value;
+    },
   });
 }

@@ -1,8 +1,6 @@
 "use client";
 
 import { Treatment } from "@/domain/entities/Treatment";
-import { PatientRepository } from "@/domain/repositories/PatientRepository";
-import { useDependencies } from "@/ioc/context/DependenciesProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   FormProvider,
@@ -42,6 +40,8 @@ import {
 } from "./ui/dialog";
 import Link from "next/link";
 import Spinner from "./ui/spinner";
+import useMutationAddTreatment from "../mutations/useMutationAddTreatment";
+import useMutationUpdateTreatment from "../mutations/useMutationUpdateTreatment";
 
 const therapeuticActivitySchema = z.object({
   name: z.string().min(1, "Debe ingresar un nombre"),
@@ -78,8 +78,7 @@ const treatmentSchema = z.object({
 });
 
 export function NewTreatmentForm({ patientId }: { patientId: string }) {
-  const { getContainer } = useDependencies();
-  const patientRepository = getContainer().resolve(PatientRepository);
+  const addTreatmentMutation = useMutationAddTreatment();
   const router = useRouter();
 
   const emptyTreatment: Treatment = {
@@ -94,10 +93,10 @@ export function NewTreatmentForm({ patientId }: { patientId: string }) {
     <PopulatedTreatmentForm
       treatment={emptyTreatment}
       onSubmit={async (data) => {
-        const res = await patientRepository.addTreatment(
-          patientId,
-          data as Treatment,
-        );
+        const res = await addTreatmentMutation.mutateAsync({
+          patientID: patientId,
+          req: data as Treatment,
+        });
         if (res.ok) {
           router.push(`/`);
         } else {
@@ -120,22 +119,42 @@ export function UpdateTreatmentForm({
   treatmentId: string;
 }) {
   const getPatientQuery = useQueryGetPatientById(patientId);
+  const updateTreatmentMutation = useMutationUpdateTreatment();
+  const router = useRouter();
 
   if (getPatientQuery.isLoading) return <div>Cargando Paciente...</div>;
-  if (!getPatientQuery.data?.ok)
-    return (
-      <div>
-        Error: {getPatientQuery.data?.errors[0].message ?? "Datos vacíos"}
-      </div>
-    );
+  if (getPatientQuery.isError || !getPatientQuery.data)
+    return <div>Error: {getPatientQuery.error?.message ?? "Datos vacíos"}</div>;
 
-  const patient = getPatientQuery.data.value;
+  const patient = getPatientQuery.data;
   const treatment = patient.treatments.find((t) => t.id === treatmentId);
 
   if (!treatment) return <div>Treatment not found</div>;
 
   return (
-    <PopulatedTreatmentForm treatment={treatment} onSubmit={async () => {}} />
+    <PopulatedTreatmentForm
+      treatment={treatment}
+      onSubmit={async (data) => {
+        const res = await updateTreatmentMutation.mutateAsync({
+          patientID: patientId,
+          req: {
+            ...getPatientQuery.data.treatments.find(
+              (t) => t.id === treatmentId,
+            ),
+            ...data,
+          },
+        });
+        if (res.ok) {
+          router.push(`/`);
+        } else {
+          console.log(res);
+          toast.error(
+            "Error al actualizar el tratamiento: " +
+              res.errors.map((e) => e.message).join(", "),
+          );
+        }
+      }}
+    />
   );
 }
 

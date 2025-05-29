@@ -19,9 +19,9 @@ export interface PatientRepository {
     treatment: StrictOmit<Treatment, "id">,
   ) => Promise<Result<void>>;
   updateTreatment: (
-    patientId: string,
     treatment: Partial<Treatment> & { id: string },
   ) => Promise<Result<void>>;
+  deleteTreatment: (treatmentId: string) => Promise<Result<void>>;
 }
 
 export const PatientRepository =

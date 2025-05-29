@@ -9,6 +9,16 @@ export default function useQueryGetAllPatients() {
 
   return useQuery({
     ...presentationQueryKeys.patients.all(),
-    queryFn: () => patientRepository.getPatientsList(),
+    queryFn: async () => {
+      const res = await patientRepository.getPatientsList();
+
+      if (!res.ok) {
+        throw new Error(
+          `Error al obtener los pacientes: ${res.errors.map((e) => e.message).join(", ")}`,
+        );
+      }
+
+      return res.value;
+    },
   });
 }

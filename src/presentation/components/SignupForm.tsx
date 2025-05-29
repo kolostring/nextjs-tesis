@@ -84,9 +84,11 @@ export default function SignupForm() {
       >
         <Card className="w-xl max-w-full gap-8">
           <CardHeader>
-            <CardTitle>Accede a tu cuenta</CardTitle>
+            <CardTitle>
+              <h2 className="text-4xl">Regístrate</h2>
+            </CardTitle>
             <CardDescription>
-              Introduce tu correo electrónico y contraseña
+              Obtén un perfil personalizado y gestiona tus pacientes
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
