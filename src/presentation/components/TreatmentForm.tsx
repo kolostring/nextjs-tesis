@@ -259,6 +259,27 @@ function PopulatedTreatmentForm({
             type="multiple"
             defaultValue={Array.from({ length: 10 }).map((_, i) => i + "")}
           >
+            {treatmentBlocksArrayField.fields.length === 0 && (
+              <div className="grid place-items-center gap-4 text-center">
+                <p className="max-w-[40ch] text-pretty">
+                  No hay bloques de tratamiento registrados.
+                </p>
+                <Button
+                  type="button"
+                  onClick={() =>
+                    treatmentBlocksArrayField.append({
+                      beginningDate: new Date(),
+                      durationDays: 1,
+                      iterations: 1,
+                      therapeuticActivities: [],
+                    })
+                  }
+                >
+                  <span>Registrar Bloque de Tratamiento</span>
+                </Button>
+              </div>
+            )}
+
             {treatmentBlocksArrayField.fields.map((field, index) => {
               const therapeuticActivitiesArr =
                 observedTreatmentBlocks[index].therapeuticActivities;

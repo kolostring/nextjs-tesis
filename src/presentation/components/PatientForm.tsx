@@ -30,6 +30,7 @@ import { StrictPick } from "@/common/types/StrictPick";
 import useMutationCreatePatient from "../mutations/useMutationCreatePatient";
 import useMutationUpdatePatient from "../mutations/useMutationUpdatePatient";
 import useQueryGetPatientById from "../queries/useQueryGetPatientById";
+import Link from "next/link";
 
 const newPatientSchema = z.object({
   fullName: z
@@ -192,9 +193,14 @@ function PatientForm({ patient, onSubmit }: PatientFormProps) {
               </FormItem>
             )}
           />
-          <Button type="submit" className="justify-self-end">
-            {form.formState.isSubmitting ? <Spinner /> : "Guardar"}
-          </Button>
+          <div className="flex justify-end gap-4">
+            <Button asChild variant="ghost">
+              <Link href="/">Cancelar</Link>
+            </Button>
+            <Button type="submit">
+              {form.formState.isSubmitting ? <Spinner /> : "Guardar"}
+            </Button>
+          </div>
         </div>
       </form>
     </FormProvider>
