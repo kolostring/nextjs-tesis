@@ -4,8 +4,7 @@ import { buildContainer, buildManager } from "./common/utils";
 import { PatientRepository } from "@/domain/repositories/PatientRepository";
 import SupabasePatientRepository from "@/infrastructure/supabase/repositories/SupabasePatientRepository";
 import { isServer, QueryClient } from "@tanstack/react-query";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { TutorAuthService } from "@/application/services/AuthService";
+import { AuthService } from "@/application/services/AuthService";
 import SupabaseAuthService from "@/infrastructure/supabase/services/SupabaseAuthService";
 import { createBrowserClient } from "@supabase/ssr";
 
@@ -53,7 +52,7 @@ export default function DIConfig({ children }: { children: React.ReactNode }) {
         PatientRepository,
         SupabasePatientRepository(getQueryClient(), makeSupabaseClient()),
       )
-      .register(TutorAuthService, SupabaseAuthService(makeSupabaseClient())),
+      .register(AuthService, SupabaseAuthService(makeSupabaseClient())),
   );
 
   return (

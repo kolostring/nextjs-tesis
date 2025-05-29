@@ -1,5 +1,5 @@
 "use client";
-import { TutorAuthService } from "@/application/services/AuthService";
+import { AuthService } from "@/application/services/AuthService";
 import { useDependencies } from "@/ioc/context/DependenciesProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
@@ -47,7 +47,7 @@ export default function LoginForm() {
   });
 
   const { getContainer } = useDependencies();
-  const loginUseCase = getContainer().resolve(TutorAuthService).login;
+  const loginUseCase = getContainer().resolve(AuthService).login;
 
   const router = useRouter();
 

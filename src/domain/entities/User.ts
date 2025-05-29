@@ -1,4 +1,4 @@
-export type Tutor = {
+export type User = {
   id: string;
   email: string;
 };

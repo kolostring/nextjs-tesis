@@ -1,12 +1,12 @@
-import { TutorAuthService } from "@/application/services/AuthService";
+import { AuthService } from "@/application/services/AuthService";
 import { Result } from "@/common/types/Result";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export default function SupabaseAuthService(
   supabase: SupabaseClient,
-): TutorAuthService {
+): AuthService {
   return {
-    async getTutor() {
+    async getUser() {
       try {
         const { data, error } = await supabase.auth.getUser();
 

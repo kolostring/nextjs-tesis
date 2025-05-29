@@ -2,12 +2,6 @@
 
 import useQueryGetAllPatients from "../queries/useQueryGetAllPatients";
 import { Button } from "./ui/button";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "./ui/accordion";
 import Link from "next/link";
 import {
   EditIcon,
@@ -53,8 +47,6 @@ export default function PatientsList() {
         Ocurrió una excepción: {getAllPatients.error?.message ?? "Datos vacíos"}
       </div>
     );
-
-  debugger;
 
   return (
     <>
