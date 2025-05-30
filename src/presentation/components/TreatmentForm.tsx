@@ -26,15 +26,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import {
-  ChevronRightIcon,
-  CopyPlusIcon,
-  CornerDownRightIcon,
-  ListEndIcon,
-  PlusIcon,
-  TrashIcon,
-  X,
-} from "lucide-react";
+import { ListEndIcon, PlusIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -247,7 +239,7 @@ function PopulatedTreatmentForm({
 
   useEffect(() => {
     form.reset(treatment);
-  }, [treatment]);
+  }, [treatment, form]);
 
   const treatmentBlocksArrayField = useFieldArray({
     control: form.control,
