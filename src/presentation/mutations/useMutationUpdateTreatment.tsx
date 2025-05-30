@@ -10,14 +10,8 @@ export default function useMutationUpdateTreatment() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async ({
-      patientID,
-      req,
-    }: {
-      patientID: string;
-      req: Partial<Treatment> & { id: string };
-    }) => {
-      const res = await patientRepository.updateTreatment(patientID, req);
+    mutationFn: async (req: Partial<Treatment> & { id: string }) => {
+      const res = await patientRepository.updateTreatment(req);
 
       if (res.ok) {
         queryClient.invalidateQueries({

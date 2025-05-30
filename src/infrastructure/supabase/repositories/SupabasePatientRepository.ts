@@ -19,7 +19,7 @@ export default function SupabasePatientRepository(
     },
     async getPatientsList(ids) {
       try {
-        const { data, error } = await supabaseClient.rpc("get_patients_list", {
+        const { data } = await supabaseClient.rpc("get_patients_list", {
           p_ids: ids?.map(Number.parseInt),
         });
 
@@ -28,9 +28,7 @@ export default function SupabasePatientRepository(
             (row): Patient => ({
               id: row.id?.toString() ?? "",
               fullName: row.full_name ?? "",
-              dateOfBirth: row.date_of_birth
-                ? new Date(row.date_of_birth)
-                : undefined,
+              dateOfBirth: new Date(row.date_of_birth!),
               description: row.description ?? undefined,
               treatments:
                 row.treatments?.map((val) => ({
@@ -47,8 +45,10 @@ export default function SupabasePatientRepository(
                         val.therapeutic_activities?.map((val) => ({
                           name: val.name ?? "",
                           dayOfBlock: val.day_of_block ?? 0,
-                          beginningHour: val.beginning_hour ?? "",
-                          endHour: val.end_hour ?? "",
+                          beginningHour: (val.beginning_hour ??
+                            "00:00") as `${number}:${number}`,
+                          endHour: (val.end_hour ??
+                            "00:00") as `${number}:${number}`,
                         })) ?? [],
                     })) ?? [],
                 })) ?? [],
@@ -114,9 +114,7 @@ export default function SupabasePatientRepository(
         const patient: Patient = {
           id: patientData.id.toString(),
           fullName: patientData.full_name,
-          dateOfBirth: patientData.date_of_birth
-            ? new Date(patientData.date_of_birth)
-            : undefined,
+          dateOfBirth: new Date(patientData.date_of_birth),
           description: patientData.description ?? undefined,
           treatments: [],
         };
@@ -162,9 +160,7 @@ export default function SupabasePatientRepository(
         const patient: Patient = {
           id: data.id.toString(),
           fullName: data.full_name,
-          dateOfBirth: data.date_of_birth
-            ? new Date(data.date_of_birth)
-            : undefined,
+          dateOfBirth: new Date(data.date_of_birth),
           description: data.description ?? undefined,
           treatments: [],
         };
@@ -219,6 +215,7 @@ export default function SupabasePatientRepository(
             iterations: val.iterations,
             activities: val.therapeuticActivities.map((val) => ({
               name: val.name,
+              description: "",
               day_of_block: val.dayOfBlock,
               beginning_hour: val.beginningHour,
               end_hour: val.endHour,
@@ -260,6 +257,7 @@ export default function SupabasePatientRepository(
             iterations: val.iterations,
             activities: val.therapeuticActivities.map((val) => ({
               name: val.name,
+              description: "",
               day_of_block: val.dayOfBlock,
               beginning_hour: val.beginningHour,
               end_hour: val.endHour,

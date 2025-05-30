@@ -5,9 +5,7 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import {
   EditIcon,
-  EllipsisIcon,
   EllipsisVerticalIcon,
-  MenuIcon,
   Share2Icon,
   TrashIcon,
 } from "lucide-react";

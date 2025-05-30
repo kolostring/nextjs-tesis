@@ -136,14 +136,9 @@ export function UpdateTreatmentForm({
       treatment={treatment}
       onSubmit={async (data) => {
         const res = await updateTreatmentMutation.mutateAsync({
-          patientID: patientId,
-          req: {
-            ...getPatientQuery.data.treatments.find(
-              (t) => t.id === treatmentId,
-            ),
-            ...data,
-          },
-        });
+          ...getPatientQuery.data.treatments.find((t) => t.id === treatmentId),
+          ...data,
+        } as Partial<Treatment> & { id: string });
         if (res.ok) {
           router.push(`/`);
         } else {
