@@ -110,6 +110,18 @@ export function NewTreatmentForm({ patientId }: { patientId: string }) {
 
   return (
     <>
+      <div className="to-card mb-8 grid grid-cols-2 rounded-lg bg-gradient-to-t from-transparent p-8">
+        <h3 className="text-xl">Usa una de nuestras plantillas</h3>
+        <p className="text-muted-foreground">
+          Puedes usar una de nuestras plantillas de tratamientos más comunes
+        </p>
+        <Button
+          className="col-start-2 row-span-2 row-start-1 w-fit self-center justify-self-end"
+          onClick={() => setIsTemplateModalOpen(true)}
+        >
+          Usar Plantilla
+        </Button>
+      </div>
       <PopulatedTreatmentForm
         treatment={formInitialTreatment}
         onSubmit={async (data) => {
@@ -325,7 +337,7 @@ function PopulatedTreatmentForm({
           >
             {treatmentBlocksArrayField.fields.length === 0 && (
               <div className="grid place-items-center gap-4 text-center">
-                <p className="max-w-[40ch] text-pretty">
+                <p className="text-muted-foreground max-w-[40ch] text-pretty">
                   No hay bloques de tratamiento registrados.
                 </p>
                 <Button
@@ -472,7 +484,7 @@ function PopulatedTreatmentForm({
             })}
           </Accordion>
         </fieldset>
-        <div className="flex justify-end gap-4">
+        <div className="mb-16 flex justify-end gap-4">
           <Button asChild variant="ghost">
             <Link href="/">Cancelar</Link>
           </Button>
@@ -531,7 +543,7 @@ function TherapeuticActivitiesFieldset({
 
         {therapeuticActivitiesArrayField.fields.length === 0 && (
           <div className="grid place-items-center gap-4 text-center">
-            <p className="max-w-[40ch] text-pretty">
+            <p className="text-muted-foreground max-w-[40ch] text-pretty">
               No hay actividades registradas.
             </p>
             <Button

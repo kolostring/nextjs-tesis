@@ -78,7 +78,7 @@ export default function PatientsList() {
       <div>
         {getAllPatients.data.length === 0 ? (
           <div className="grid place-items-center gap-4 text-center">
-            <p className="max-w-[40ch]">
+            <p className="text-muted-foreground max-w-[40ch]">
               No hay pacientes registrados. <br />
               ¡Añade uno para comenzar a gestionar su tratamiento!.
             </p>
@@ -172,7 +172,7 @@ export default function PatientsList() {
                 <div className="grid px-8 pb-8">
                   {patient.treatments.length === 0 ? (
                     <div className="grid place-items-center gap-4 text-center">
-                      <p className="max-w-[40ch] text-pretty">
+                      <p className="text-muted-foreground max-w-[40ch] text-pretty">
                         No hay tratamientos registrados. Registra uno ahora para
                         tener los recordatorios del paciente listos.
                       </p>
