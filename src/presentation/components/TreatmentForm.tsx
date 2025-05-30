@@ -26,7 +26,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import { PlusIcon, TrashIcon } from "lucide-react";
+import {
+  ChevronRightIcon,
+  CopyPlusIcon,
+  CornerDownRightIcon,
+  ListEndIcon,
+  PlusIcon,
+  TrashIcon,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -42,6 +50,8 @@ import Link from "next/link";
 import Spinner from "./ui/spinner";
 import useMutationAddTreatment from "../mutations/useMutationAddTreatment";
 import useMutationUpdateTreatment from "../mutations/useMutationUpdateTreatment";
+import { useEffect, useState } from "react";
+import { templateTreatments } from "../const/templateTreatments";
 
 const therapeuticActivitySchema = z.object({
   name: z.string().min(1, "Debe ingresar un nombre"),
@@ -80,33 +90,98 @@ const treatmentSchema = z.object({
 export function NewTreatmentForm({ patientId }: { patientId: string }) {
   const addTreatmentMutation = useMutationAddTreatment();
   const router = useRouter();
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
-  const emptyTreatment: Treatment = {
+  const [formInitialTreatment, setFormInitialTreatment] = useState<Treatment>({
     id: "",
     eyeCondition: "",
     name: "",
     description: "",
     treatmentBlocks: [],
-  };
+  });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      toast("Usa una de nuestras plantillas", {
+        description:
+          "Puedes usar una de nuestras plantillas de tratamientos más comunes",
+        duration: 20000,
+        action: {
+          label: "Usar plantillas",
+          onClick: () => setIsTemplateModalOpen(true),
+        },
+      });
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
-    <PopulatedTreatmentForm
-      treatment={emptyTreatment}
-      onSubmit={async (data) => {
-        const res = await addTreatmentMutation.mutateAsync({
-          patientID: patientId,
-          req: data as Treatment,
-        });
-        if (res.ok) {
-          router.push(`/`);
-        } else {
-          toast.error(
-            "Error al añadir tratamiento: " +
-              res.errors.map((e) => e.message).join(", "),
-          );
-        }
-      }}
-    />
+    <>
+      <PopulatedTreatmentForm
+        treatment={formInitialTreatment}
+        onSubmit={async (data) => {
+          const res = await addTreatmentMutation.mutateAsync({
+            patientID: patientId,
+            req: data as Treatment,
+          });
+          if (res.ok) {
+            router.push(`/`);
+          } else {
+            toast.error(
+              "Error al añadir tratamiento: " +
+                res.errors.map((e) => e.message).join(", "),
+            );
+          }
+        }}
+      />
+      <Dialog open={isTemplateModalOpen} onOpenChange={setIsTemplateModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Plantillas de tratamientos</DialogTitle>
+            <DialogDescription>
+              Puedes usar una de nuestras plantillas de tratamientos más comunes
+            </DialogDescription>
+          </DialogHeader>
+
+          <Accordion
+            type="single"
+            defaultValue={Object.keys(templateTreatments)[0]}
+          >
+            {Object.entries(templateTreatments).map(([key, value]) => (
+              <AccordionItem key={key} value={key}>
+                <AccordionTrigger className="capitalize">
+                  {key}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ul className="mb-4 grid gap-4">
+                    {value.map((treatment, index) => (
+                      <li className="" key={index + treatment.name}>
+                        <button
+                          className="group bg-card grid w-full cursor-pointer justify-start gap-2 rounded-lg px-4 py-4 text-start"
+                          onClick={() => {
+                            console.log(treatment);
+                            setFormInitialTreatment(treatment);
+                            setIsTemplateModalOpen(false);
+                          }}
+                        >
+                          <span className="underline-offset-2 group-hover:underline group-focus:underline">
+                            {treatment.name}
+                          </span>
+                          <p className="text-muted-foreground text-xs">
+                            {treatment.description}
+                          </p>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -170,6 +245,10 @@ function PopulatedTreatmentForm({
     resolver: zodResolver(treatmentSchema),
   });
 
+  useEffect(() => {
+    form.reset(treatment);
+  }, [treatment]);
+
   const treatmentBlocksArrayField = useFieldArray({
     control: form.control,
     name: "treatmentBlocks",
@@ -227,7 +306,7 @@ function PopulatedTreatmentForm({
           )}
         />
 
-        <fieldset className="mt-2 mb-4 grid">
+        <fieldset className="mt-8 mb-4 grid">
           <div className="mb-8 flex items-center justify-between">
             <legend className="float-left mb-2 text-2xl font-bold uppercase">
               Bloques de tratamiento
@@ -450,7 +529,8 @@ function TherapeuticActivitiesFieldset({
       </div>
 
       <div className="grid gap-8 md:gap-2">
-        <div className="border-muted hidden grid-cols-[3fr_1fr_2fr_2fr_20px] gap-1 border-t border-b py-4 text-xs md:grid md:px-4 md:*:pl-4">
+        <div className="border-muted hidden grid-cols-[40px_3fr_1fr_2fr_2fr_40px] gap-1 border-t border-b py-4 text-xs md:grid md:*:pl-4">
+          <span></span>
           <span>Nombre</span>
           <span>Día</span>
           <span>Hora inicio</span>
@@ -481,13 +561,21 @@ function TherapeuticActivitiesFieldset({
         {therapeuticActivitiesArrayField.fields.map((field, index) => (
           <div
             key={field.id}
-            className="grid grid-cols-6 gap-2 md:grid-cols-[3fr_1fr_2fr_2fr_20px] md:gap-1 md:px-4 [&_input]:!text-xs"
+            className="grid grid-cols-6 gap-2 md:grid-cols-[40px_3fr_1fr_2fr_2fr_40px] md:gap-1 [&_input]:!text-xs"
           >
+            <Button
+              variant="ghost"
+              type="button"
+              className="col-start-6 row-start-1 mt-1 self-end md:col-start-auto md:row-start-auto md:mt-0 md:self-start"
+              onClick={() => therapeuticActivitiesArrayField.remove(index)}
+            >
+              <X />
+            </Button>
             <FormField
               control={form.control}
               name={`treatmentBlocks.${treatmentBlockIndex}.therapeuticActivities.${index}.name`}
               render={({ field }) => (
-                <FormItem className="col-span-5 md:col-span-1">
+                <FormItem className="col-span-4 md:col-span-1">
                   <FormLabel className="md:sr-only">
                     Nombre de la Actividad *
                   </FormLabel>
@@ -554,10 +642,12 @@ function TherapeuticActivitiesFieldset({
             <Button
               variant="ghost"
               type="button"
-              className="col-start-6 row-start-1 mt-1 self-end p-[5px] md:col-start-auto md:row-start-auto md:mt-0 md:max-w-0 md:self-start"
-              onClick={() => therapeuticActivitiesArrayField.remove(index)}
+              className="col-start-5 row-start-1 mt-1 self-end md:col-start-auto md:row-start-auto md:mt-0 md:self-start"
+              onClick={() =>
+                therapeuticActivitiesArrayField.append({ ...field })
+              }
             >
-              <TrashIcon />
+              <ListEndIcon />
             </Button>
           </div>
         ))}

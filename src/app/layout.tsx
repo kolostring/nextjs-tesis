@@ -43,7 +43,7 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${sans.variable} ${serif.variable} ${geistMono.variable} bg-background grid min-h-dvh antialiased`}
+        className={`${sans.variable} ${serif.variable} ${geistMono.variable} bg-background grid min-h-dvh auto-rows-auto antialiased`}
       >
         <QueryProvider>
           <DIConfig>

@@ -17,7 +17,7 @@ export default function Navbar() {
   });
 
   return (
-    <nav className="sticky top-0 container mx-auto flex h-fit max-w-2xl items-center justify-between px-4 py-4">
+    <nav className="bg-background/80 sticky top-0 container mx-auto flex h-fit max-w-2xl items-center justify-between px-4 py-4 backdrop-blur-md">
       <Link
         href="/"
         className="flex items-center gap-2 font-bold tracking-widest text-blue-400"

@@ -187,7 +187,7 @@ export default function PatientsList() {
                       <p className="mb-4">
                         Tratamientos: {patient.treatments.length}
                       </p>
-                      <div className="mb-4 gap-4">
+                      <div className="mb-4 grid gap-4">
                         {patient.treatments.map((val) => (
                           <div key={val.id} className="bg-card rounded-lg p-4">
                             <div className="flex items-start justify-between">
