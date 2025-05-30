@@ -4,6 +4,7 @@ import "./globals.css";
 import QueryProvider from "@/presentation/context/QueryProvider";
 import DIConfig from "@/ioc/DIConfig";
 import { Toaster } from "sonner";
+import Navbar from "@/presentation/components/Navbar";
 
 const serif = Playfair_Display({
   variable: "--font-serif",
@@ -42,10 +43,13 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${sans.variable} ${serif.variable} ${geistMono.variable} bg-background antialiased`}
+        className={`${sans.variable} ${serif.variable} ${geistMono.variable} bg-background grid min-h-dvh antialiased`}
       >
         <QueryProvider>
-          <DIConfig>{children}</DIConfig>
+          <DIConfig>
+            <Navbar />
+            {children}
+          </DIConfig>
         </QueryProvider>
         <Toaster />
       </body>

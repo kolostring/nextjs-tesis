@@ -31,18 +31,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import useQueryGetUserData from "../queries/useQueryGetUserData";
 
 export default function PatientsList() {
   const getAllPatients = useQueryGetAllPatients();
+  const getUserDataQuery = useQueryGetUserData();
 
   const deletePatientMutation = useMutationDeletePatient();
   const deleteTreatmentMutation = useMutationDeleteTreatment();
 
-  if (getAllPatients.isLoading) return <div>Cargando Pacientes...</div>;
+  if (getAllPatients.isLoading || getUserDataQuery.isLoading)
+    return <div className="text-center">Cargando Pacientes...</div>;
   if (getAllPatients.isError || !getAllPatients.data)
     return (
       <div>
         Ocurrió una excepción: {getAllPatients.error?.message ?? "Datos vacíos"}
+      </div>
+    );
+
+  if (!getUserDataQuery.data)
+    return (
+      <div className="grid place-content-center text-center">
+        <p className="mb-8">
+          No estás autenticado. <br /> Inicia sesión para gestionar tus
+          pacientes
+        </p>
+        <Button asChild className="mx-auto w-fit">
+          <Link href="/login">Iniciar Sesión</Link>
+        </Button>
       </div>
     );
 

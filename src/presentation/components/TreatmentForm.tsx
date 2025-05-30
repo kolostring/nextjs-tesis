@@ -100,7 +100,6 @@ export function NewTreatmentForm({ patientId }: { patientId: string }) {
         if (res.ok) {
           router.push(`/`);
         } else {
-          console.log(res);
           toast.error(
             "Error al añadir tratamiento: " +
               res.errors.map((e) => e.message).join(", "),
@@ -142,7 +141,6 @@ export function UpdateTreatmentForm({
         if (res.ok) {
           router.push(`/`);
         } else {
-          console.log(res);
           toast.error(
             "Error al actualizar el tratamiento: " +
               res.errors.map((e) => e.message).join(", "),

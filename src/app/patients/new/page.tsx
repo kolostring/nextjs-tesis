@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/presentation/components/ui/card";
 
 export default async function CreatePatientPage() {
   return (
-    <div className="mx-auto grid min-h-dvh max-w-2xl items-center px-4">
+    <div className="mx-auto grid w-full max-w-2xl items-center px-4">
       <Card className="">
         <CardContent>
           <header className="mb-16">

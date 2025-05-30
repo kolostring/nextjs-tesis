@@ -34,7 +34,6 @@ const newPatientSchema = z.object({
     .string()
     .min(1, "Debe ingresar una fecha")
     .superRefine((arg, ctx) => {
-      console.log(arg);
       const parsedDate = parse(arg, "yyyy-MM-dd", new Date());
 
       if (!isValid(parsedDate)) {
@@ -74,7 +73,6 @@ export function NewPatientForm() {
           router.push("/");
           toast("Paciente creado exitosamente!");
         } else {
-          console.log(res);
           toast.error("Error al crear el paciente: ", {
             description: res.errors.map((e) => e.message).join(", "),
           });
@@ -112,7 +110,6 @@ export function UpdatePatientForm({ patientID }: UpdatePatientFormProps) {
           router.push("/");
           toast("Paciente actualizado exitosamente!");
         } else {
-          console.log(res);
           toast.error("Error al crear el paciente: ", {
             description: res.errors.map((e) => e.message).join(", "),
           });
@@ -140,7 +137,7 @@ function PatientForm({ patient, onSubmit }: PatientFormProps) {
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="grid gap-4">
+        <div className="grid w-full gap-4">
           <FormField
             control={form.control}
             name="fullName"

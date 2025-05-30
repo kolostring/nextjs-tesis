@@ -67,9 +67,6 @@ export default function SupabasePatientRepository(
     },
     createPatient: async (req) => {
       try {
-        console.log(
-          (await supabaseClient.auth.getSession()).data.session?.access_token,
-        );
         // First create the patient
         const { data: patientData, error: patientError } = await supabaseClient
           .from("patients")
@@ -244,8 +241,6 @@ export default function SupabasePatientRepository(
     },
     async updateTreatment(treatment) {
       try {
-        console.log(treatment);
-
         const { error } = await supabaseClient.rpc("update_full_treatment", {
           p_treatment_id: Number.parseInt(treatment.id),
           p_eye_condition: treatment.eyeCondition,

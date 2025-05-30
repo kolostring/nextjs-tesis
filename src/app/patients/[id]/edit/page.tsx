@@ -9,7 +9,7 @@ export default async function UpdatePatientPage({ params }: PageProps) {
   const { id } = await params;
 
   return (
-    <div className="mx-auto grid min-h-dvh max-w-2xl items-center px-4">
+    <div className="mx-auto grid w-full max-w-2xl items-center px-4">
       <Card className="">
         <CardContent>
           <header className="mb-16">

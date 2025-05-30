@@ -9,4 +9,5 @@ export const presentationQueryKeys = createQueryKeyStore({
       queryKey: [id],
     }),
   },
+  user: null,
 });

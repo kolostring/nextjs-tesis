@@ -8,7 +8,7 @@ export default async function NewTreatmentPage({ params }: PageProps) {
   const { id } = await params;
 
   return (
-    <div className="mx-auto min-h-dvh max-w-2xl px-4">
+    <div className="mx-auto w-full max-w-2xl px-4">
       <header className="mb-16">
         <h1 className="text-4xl font-bold">Nuevo tratamiento</h1>
         <p>

@@ -1,6 +1,4 @@
 "use client";
-import { AuthService } from "@/application/services/AuthService";
-import { useDependencies } from "@/ioc/context/DependenciesProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -24,6 +22,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
 import Spinner from "./ui/spinner";
+import useMutationSignup from "../mutations/useMutationSignup";
 
 const signupSchema = z
   .object({
@@ -34,7 +33,10 @@ const signupSchema = z
       .max(100, "Máximo 100 caracteres"),
     password: z
       .string()
-      .min(1, "Debe ingresar una contraseña")
+      .min(
+        6,
+        "Debe ingresar una contraseña con una longitud de al menos 6 caracteres",
+      )
       .max(100, "Máximo 100 caracteres"),
     confirmPassword: z.string(),
   })
@@ -58,20 +60,21 @@ export default function SignupForm() {
     resolver: zodResolver(signupSchema),
   });
 
-  const { getContainer } = useDependencies();
-  const signupUseCase = getContainer().resolve(AuthService).signup;
+  const signupMutation = useMutationSignup();
 
   const router = useRouter();
 
   const onSubmit = async (data: z.infer<typeof signupSchema>) => {
-    const res = await signupUseCase(data.email, data.password);
-    console.log(res);
+    const res = await signupMutation.mutateAsync({
+      email: data.email,
+      password: data.password,
+    });
     if (!res.ok) {
-      toast("Error al iniciar sesión: ", {
+      toast.error("Error al iniciar sesión: ", {
         description: res.errors.map((e) => e.message).join(", "),
       });
     } else {
-      toast("Registro exitoso. Redireccionando a la página de inicio...");
+      toast("Registro exitoso");
       router.push("/");
     }
   };
@@ -79,7 +82,7 @@ export default function SignupForm() {
   return (
     <FormProvider {...form}>
       <form
-        className="grid min-h-dvh place-content-center"
+        className="grid place-content-center"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <Card className="w-xl max-w-full gap-8">

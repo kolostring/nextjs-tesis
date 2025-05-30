@@ -13,7 +13,7 @@ export default function SupabaseAuthService(
         if (error) {
           return Result.error([
             {
-              code: "SUPABASE_ERROR",
+              code: error.code ?? "SUPABASE_ERROR",
               message: error.message,
             },
           ]);
@@ -42,7 +42,7 @@ export default function SupabaseAuthService(
         if (error) {
           return Result.error([
             {
-              code: "SUPABASE_ERROR",
+              code: error.code ?? "SUPABASE_ERROR",
               message: error.message,
             },
           ]);
@@ -69,7 +69,7 @@ export default function SupabaseAuthService(
         if (error) {
           return Result.error([
             {
-              code: "SUPABASE_ERROR",
+              code: error.code ?? "SUPABASE_ERROR",
               message: error.message,
             },
           ]);
@@ -93,7 +93,7 @@ export default function SupabaseAuthService(
         if (error) {
           return Result.error([
             {
-              code: "SUPABASE_ERROR",
+              code: error.code ?? "SUPABASE_ERROR",
               message: error.message,
             },
           ]);
