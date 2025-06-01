@@ -4,6 +4,7 @@ import { PatientRepository } from "@/domain/repositories/PatientRepository";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { QueryClient } from "@tanstack/react-query";
 import { Database } from "../types/database.types";
+import { PatientAdapter } from "@/adapters/AdapterPatient";
 
 export default function SupabasePatientRepository(
   queryClient: QueryClient,
@@ -24,36 +25,8 @@ export default function SupabasePatientRepository(
         });
 
         const patients =
-          data?.map(
-            (row): Patient => ({
-              id: row.id?.toString() ?? "",
-              fullName: row.full_name ?? "",
-              dateOfBirth: new Date(row.date_of_birth!),
-              description: row.description ?? undefined,
-              treatments:
-                row.treatments?.map((val) => ({
-                  id: val.id?.toString() ?? "",
-                  eyeCondition: val.eye_condition ?? "",
-                  name: val.name ?? "",
-                  description: val.description ?? "",
-                  treatmentBlocks:
-                    val.treatment_blocks?.map((val) => ({
-                      beginningDate: new Date(val.beginning_date ?? ""),
-                      durationDays: val.duration_days ?? 0,
-                      iterations: val.iterations ?? 0,
-                      therapeuticActivities:
-                        val.therapeutic_activities?.map((val) => ({
-                          name: val.name ?? "",
-                          dayOfBlock: val.day_of_block ?? 0,
-                          beginningHour: (val.beginning_hour ??
-                            "00:00") as `${number}:${number}`,
-                          endHour: (val.end_hour ??
-                            "00:00") as `${number}:${number}`,
-                        })) ?? [],
-                    })) ?? [],
-                })) ?? [],
-            }),
-          ) ?? [];
+          data?.map((row): Patient => PatientAdapter.fromDataBaseOutput(row)) ??
+          [];
 
         return Result.ok(patients);
       } catch (error) {
@@ -108,15 +81,7 @@ export default function SupabasePatientRepository(
           ]);
         }
 
-        const patient: Patient = {
-          id: patientData.id.toString(),
-          fullName: patientData.full_name,
-          dateOfBirth: new Date(patientData.date_of_birth),
-          description: patientData.description ?? undefined,
-          treatments: [],
-        };
-
-        return Result.ok(patient);
+        return Result.ok(undefined);
       } catch (error) {
         return Result.error([
           {
@@ -126,7 +91,7 @@ export default function SupabasePatientRepository(
         ]);
       }
     },
-    async updatePatient(req): Promise<Result<Patient>> {
+    async updatePatient(req) {
       try {
         const updateData: {
           full_name?: string;
@@ -138,7 +103,7 @@ export default function SupabasePatientRepository(
           description: req.description,
         };
 
-        const { data, error } = await supabaseClient
+        const { error } = await supabaseClient
           .from("patients")
           .update(updateData)
           .eq("id", Number.parseInt(req.id))
@@ -154,15 +119,7 @@ export default function SupabasePatientRepository(
           ]);
         }
 
-        const patient: Patient = {
-          id: data.id.toString(),
-          fullName: data.full_name,
-          dateOfBirth: new Date(data.date_of_birth),
-          description: data.description ?? undefined,
-          treatments: [],
-        };
-
-        return Result.ok(patient);
+        return Result.ok(undefined);
       } catch (error) {
         return Result.error([
           {

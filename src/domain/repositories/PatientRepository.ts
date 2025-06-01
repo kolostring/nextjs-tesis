@@ -9,10 +9,10 @@ export interface PatientRepository {
   getPatientsList: (ids?: string[]) => Promise<Result<Patient[]>>;
   createPatient: (
     request: StrictOmit<Patient, "id" | "treatments">,
-  ) => Promise<Result<Patient>>;
+  ) => Promise<Result<undefined>>;
   updatePatient: (
     request: Partial<StrictOmit<Patient, "treatments">> & { id: string },
-  ) => Promise<Result<Patient>>;
+  ) => Promise<Result<undefined>>;
   deletePatient: (id: string) => Promise<Result<void>>;
   addTreatment: (
     patientId: string,
