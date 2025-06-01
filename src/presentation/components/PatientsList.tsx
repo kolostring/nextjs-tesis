@@ -256,8 +256,10 @@ export default function PatientsList() {
                                 {val.treatmentBlocks
                                   .map((block) =>
                                     block.therapeuticActivities.map(
-                                      (activity) => (
-                                        <li key={activity.name + val.id}>
+                                      (activity, index) => (
+                                        <li
+                                          key={activity.name + val.id + index}
+                                        >
                                           {activity.name}
                                         </li>
                                       ),

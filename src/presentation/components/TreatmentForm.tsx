@@ -44,6 +44,7 @@ import useMutationAddTreatment from "../mutations/useMutationAddTreatment";
 import useMutationUpdateTreatment from "../mutations/useMutationUpdateTreatment";
 import { useEffect, useState } from "react";
 import { templateTreatments } from "../const/templateTreatments";
+import { Textarea } from "./ui/textarea";
 
 const therapeuticActivitySchema = z.object({
   name: z.string().min(1, "Debe ingresar un nombre"),
@@ -75,7 +76,7 @@ const treatmentBlockSchema = z
 const treatmentSchema = z.object({
   eyeCondition: z.string().min(1, "Debe ingresar una condición ocular"),
   name: z.string().min(1, "Debe ingresar un nombre"),
-  description: z.string().max(100, "Máximo 100 caracteres"),
+  description: z.string(),
   treatmentBlocks: z.array(treatmentBlockSchema),
 });
 
@@ -91,22 +92,6 @@ export function NewTreatmentForm({ patientId }: { patientId: string }) {
     description: "",
     treatmentBlocks: [],
   });
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      toast("Usa una de nuestras plantillas", {
-        description:
-          "Puedes usar una de nuestras plantillas de tratamientos más comunes",
-        duration: 20000,
-        action: {
-          label: "Usar plantillas",
-          onClick: () => setIsTemplateModalOpen(true),
-        },
-      });
-    }, 1000);
-
-    return () => clearTimeout(timeout);
-  }, []);
 
   return (
     <>
@@ -303,7 +288,7 @@ function PopulatedTreatmentForm({
                 Descripción opcional y breve del tratamiento
               </FormDescription>
               <FormControl>
-                <Input type="text" {...field} />
+                <Textarea {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
