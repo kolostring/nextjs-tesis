@@ -7,7 +7,6 @@ import {
   BoxSelectIcon,
   EditIcon,
   EllipsisVerticalIcon,
-  Share2Icon,
   TrashIcon,
   XIcon,
 } from "lucide-react";
