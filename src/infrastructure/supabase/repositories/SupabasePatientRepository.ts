@@ -262,5 +262,54 @@ export default function SupabasePatientRepository(
         ]);
       }
     },
+    async initiatePatientShare(patientIds) {
+      try {
+        const { data, error } = await supabaseClient.rpc(
+          "create_share_patients",
+          {
+            p_patient_ids: patientIds.map((id) => Number.parseInt(id)),
+          },
+        );
+        if (error) {
+          return Result.error([
+            {
+              code: "SUPABASE_ERROR",
+              message: error.message,
+            },
+          ]);
+        }
+        return Result.ok(data);
+      } catch (error) {
+        return Result.error([
+          {
+            code: "UNEXPECTED_ERROR",
+            message: error instanceof Error ? error.message : "Unknown error",
+          },
+        ]);
+      }
+    },
+    async acceptPatientShare(shareCode) {
+      try {
+        const { error } = await supabaseClient.rpc("accept_share_patients", {
+          p_share_code: shareCode,
+        });
+        if (error) {
+          return Result.error([
+            {
+              code: "SUPABASE_ERROR",
+              message: error.message,
+            },
+          ]);
+        }
+        return Result.ok(undefined);
+      } catch (error) {
+        return Result.error([
+          {
+            code: "UNEXPECTED_ERROR",
+            message: error instanceof Error ? error.message : "Unknown error",
+          },
+        ]);
+      }
+    },
   };
 }

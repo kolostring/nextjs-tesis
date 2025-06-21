@@ -185,7 +185,7 @@ export function UpdateTreatmentForm({
   const updateTreatmentMutation = useMutationUpdateTreatment();
   const router = useRouter();
 
-  if (getPatientQuery.isLoading) return <div>Cargando Paciente...</div>;
+  if (getPatientQuery.isLoading) return <div>Cargando paciente...</div>;
   if (getPatientQuery.isError || !getPatientQuery.data)
     return <div>Error: {getPatientQuery.error?.message ?? "Datos vacíos"}</div>;
 

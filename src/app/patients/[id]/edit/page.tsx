@@ -13,7 +13,7 @@ export default async function UpdatePatientPage({ params }: PageProps) {
       <Card className="">
         <CardContent>
           <header className="mb-16">
-            <h1 className="text-4xl font-bold">Editar Paciente</h1>
+            <h1 className="text-4xl font-bold">Editar paciente</h1>
             <p>Edita la información básica del paciente</p>
           </header>
           <main>

@@ -22,6 +22,8 @@ export interface PatientRepository {
     treatment: Partial<Treatment> & { id: string },
   ) => Promise<Result<void>>;
   deleteTreatment: (treatmentId: string) => Promise<Result<void>>;
+  initiatePatientShare: (patientIds: string[]) => Promise<Result<string>>;
+  acceptPatientShare: (shareCode: string) => Promise<Result<void>>;
 }
 
 export const PatientRepository =

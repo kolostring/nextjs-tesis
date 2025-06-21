@@ -7,7 +7,7 @@ export default async function CreatePatientPage() {
       <Card className="">
         <CardContent>
           <header className="mb-16">
-            <h1 className="text-4xl font-bold">Crear Paciente</h1>
+            <h1 className="text-4xl font-bold">Crear paciente</h1>
             <p className="max-w-[40ch]">
               Añade la información básica de un paciente para comenzar a
               gestionar sus tratamientos

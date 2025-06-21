@@ -1,14 +1,28 @@
 import { PatientRepository } from "@/domain/repositories/PatientRepository";
 import { useDependencies } from "@/ioc/context/DependenciesProvider";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { presentationQueryKeys } from "../const/presentationQueryKeys";
+import { Result } from "@/common/types/Result";
+import { StrictOmit } from "@/common/types/StrictOmit";
 
-export default function useMutationDeletePatient() {
+export type UseMutationDeletePatientOptions = StrictOmit<
+  UseMutationOptions<Result<void>, Error, string, unknown>,
+  "mutationFn"
+>;
+
+export default function useMutationDeletePatient(
+  props?: UseMutationDeletePatientOptions,
+) {
   const { getContainer } = useDependencies();
   const patientRepository = getContainer().resolve(PatientRepository);
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
+    ...props,
     mutationFn: async (id: string) => {
       const res = await patientRepository.deletePatient(id);
 

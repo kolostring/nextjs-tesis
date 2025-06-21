@@ -71,7 +71,7 @@ export function NewPatientForm() {
 
         if (res.ok) {
           router.push("/");
-          toast("Paciente creado exitosamente!");
+          toast("paciente creado exitosamente!");
         } else {
           toast.error("Error al crear el paciente: ", {
             description: res.errors.map((e) => e.message).join(", "),
@@ -91,7 +91,7 @@ export function UpdatePatientForm({ patientID }: UpdatePatientFormProps) {
   const updatePatientMutation = useMutationUpdatePatient();
   const router = useRouter();
 
-  if (getPatientQuery.isLoading) return <div>Cargando Paciente...</div>;
+  if (getPatientQuery.isLoading) return <div>Cargando paciente...</div>;
   if (getPatientQuery.isError || !getPatientQuery.data)
     return <div>Error: {getPatientQuery.error?.message ?? "Datos vacíos"}</div>;
 
@@ -108,7 +108,7 @@ export function UpdatePatientForm({ patientID }: UpdatePatientFormProps) {
 
         if (res.ok) {
           router.push("/");
-          toast("Paciente actualizado exitosamente!");
+          toast("paciente actualizado exitosamente!");
         } else {
           toast.error("Error al crear el paciente: ", {
             description: res.errors.map((e) => e.message).join(", "),
